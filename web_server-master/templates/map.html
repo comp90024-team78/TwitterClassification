@@ -1,0 +1,245 @@
+{% extends "layout.html" %}
+{% block body %}
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading">Loading Map Coordinates... &#8230;</div>
+
+<!-- Labels to show the City name and Count -->
+
+<div id="data-box" class="nicebox">
+    <label id="data-label" for="data-value"></label>
+    <span id="data-value"></span>
+</div>
+
+<!-- Map Container -->
+
+<div id="map"></div>
+
+<!-- Javascripts requried for the map -->
+
+<script type="text/javascript">
+
+	// Google Map Styles for Map Settings 
+
+      var mapStyle = [{
+          'featureType': 'all',
+          'elementType': 'all',
+          'stylers': [{'visibility': 'on'}]
+        }, {
+          'featureType': 'landscape',
+          'elementType': 'geometry',
+          'stylers': [{'visibility': 'on'}, {'color': '#fcfcfc'}]
+        }, {
+          'featureType': 'water',
+          'elementType': 'labels',
+          'stylers': [{'visibility': 'off'}]
+        }, {
+          'featureType': 'water',
+          'elementType': 'geometry',
+          'stylers': [{'visibility': 'on'}, {'hue': '#5f94ff'}, {'lightness': 60}]
+        }];
+		
+	// Initialize Map variable 
+      var map;
+
+	// Load chart libaries for Column and Barchart
+
+        google.charts.load('current', {'packages':['corechart','bar']});
+
+
+	// Initalize Map to load the Map in HTML element 
+
+      function initMap() {
+
+        // load the map
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: -25.734968, lng: 133.489563},
+          zoom: 4,
+          styles: mapStyle
+        });
+
+        //Set up style
+       /* map.data.setStyle({
+          strokeWeight: 0.5,
+          strokeColor: '#fff',
+          zIndex: 1,
+          fillColor: 'red',
+          fillOpacity: 0.75,
+          visible: true
+        });*/
+		
+		// Setup dynamic style
+		
+		map.data.setStyle(styleFeature);		
+		
+		// Setup actions for various events
+        map.data.addListener('mouseover', mouseInToRegion);
+        map.data.addListener('mouseout', mouseOutOfRegion);
+        map.data.addListener('click', clickOnRegion);
+
+        clearCensusData();
+
+        loadMapShapes();
+      }
+
+
+
+	//the function to show chart when clicking on the region of the map
+      function clickOnRegion(e){
+
+        var $mapDialog=$('<div/>');
+		
+		//the name of the region in geojson
+		
+        var state_name=e.feature.getProperty('gcc_name11');
+
+
+		//jquery ui dialog
+
+        $mapDialog.dialog({
+            title:'Sins Comparision',
+            height:500,
+            width:850,
+            close: function(event, ui)
+            {
+                $(this).dialog('destroy');
+            }
+        });
+
+		
+		//The id variable in geojson
+        var state_id=e.feature.getProperty('cartodb_id');
+
+
+		//ajax call to fetch data from the server side
+        $.ajax({
+            url: '{{ url_for('map_chart') }}',
+            type: 'GET',
+            data: {state_id:state_id},
+            beforeSend: function () {
+				//display loading image
+			
+                 document.getElementById('loading-overlay').style.display = 'block';
+
+            },
+            complete: function (data) {
+				//remove loading image
+                document.getElementById('loading-overlay').style.display = 'none';
+
+				
+                $('#modal-heading').text(state_name);
+
+            },
+            success: function (data) {
+			
+			//load the contents on the dialog
+                $mapDialog.html(data);
+
+
+            }
+        });
+
+      }
+
+	//destroy the dialog on close
+      function closeModal(thisObj){
+        $(this).closest('.ui-dialog-content').dialog('close');
+      }
+	  
+	  //style various regions based on their data
+	  
+	  function styleFeature(feature) {
+	  
+		var state_id=100
+	  
+		if (feature.getProperty('state_id') != null) {
+          state_id = feature.getProperty('state_id');
+        }
+		
+		//random colors on the cities who have data based on the id
+
+        var fill_color='rgb('+state_id*45%255+', '+state_id*25%255+', '+state_id*44%255+')'
+		
+		return {
+          strokeWeight: 0.5,
+          strokeColor: '#fff',
+          zIndex: 1,
+          fillColor: fill_color,
+          fillOpacity: state_id==100? 0.75:1,
+          visible: true
+        };
+	  
+	  }
+	  
+	 
+      /** Loads the state boundary polygons from a GeoJSON source. */
+      function loadMapShapes() {
+        // load Australia Greater Cities outline polygons from a GeoJson file
+		map.data.loadGeoJson('{{ url_for('static', filename='./australia_gccsa.json') }}', 
+		{ idPropertyName: 'cartodb_id' });
+
+		google.maps.event.addListenerOnce(map.data, 'addfeature', function() {
+         loadTweetData();
+        //          document.getElementById('loading-overlay').style.display = 'none';
+
+        });
+      }
+
+	//show data on hover 
+      function loadTweetData() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '{{ url_for('get_data') }}');
+        xhr.onload = function() {
+          document.getElementById('loading-overlay').style.display = 'none';
+
+          var count_data = JSON.parse(xhr.responseText);
+          count_data.forEach(function(row) {
+            // update the existing row with the new data
+
+            var count="Sloth= "+row.data.sloth+", Greed= "+row.data.greed;
+
+            map.data.getFeatureById(row.state).setProperty('tweets_count', count);
+            map.data.getFeatureById(row.state).setProperty('state_id', row.state);
+          });
+        };
+        xhr.send();
+      }
+
+      /** Removes census data from each shape on the map and resets the UI. */
+      function clearCensusData() {
+        map.data.forEach(function(row) {
+          row.setProperty('tweets_count', '0');
+        });
+      }
+
+      /**
+       * Responds to the mouse-in event on a map shape (state).
+       *
+       * @param {?google.maps.MouseEvent} e
+       */
+      function mouseInToRegion(e) {
+        // set the hover state so the setStyle function can change the border
+        e.feature.setProperty('state', 'hover');
+        // update the label
+        document.getElementById('data-label').textContent =e.feature.getProperty('gcc_name11');
+        document.getElementById('data-box').style.display = 'block';
+        document.getElementById('data-value').textContent =e.feature.getProperty('tweets_count');
+      }
+
+      /**
+       * Responds to the mouse-out event on a map shape (state).
+       *
+       * @param {?google.maps.MouseEvent} e
+       */
+      function mouseOutOfRegion(e) {
+        // reset the hover state, returning the border to normal
+        e.feature.setProperty('state', 'normal');
+      }
+
+</script>
+
+<!-- Load google map based on the API -->
+
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCGdnrighe6R9fIiw9_rpzmn1SG-QOd3mU&callback=initMap">
+</script>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "layout.html" %}
+{% block body %}
+
+
+
+<div class="container-fluid">
+
+    <div class="row">
+        <div class="col-5">
+            <div id="piechart" style="width: 800px; height: 450px;"></div>
+            <div id="barchart_values" style="width: 900px; height: 300px;"></div>
+        </div>
+        <div class="col-5">
+            <div id="curve_chart" style="width: 900px; height: 400px"></div>
+
+            <h5 class="text-center"></h5>
+
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Sins</th>
+                    <th>No of People</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Lust</td>
+                    <td>20</td>
+                </tr>
+                <tr>
+                    <td>Gluttony</td>
+                    <td>11</td>
+                </tr>
+                <tr>
+                    <td>Greed</td>
+                    <td>8</td>
+                </tr>
+                <tr>
+                    <td>Sloth</td>
+                    <td>6</td>
+                </tr>
+                <tr>
+                    <td>Wrath</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td>Envy</td>
+                    <td>7</td>
+                </tr>
+                <tr>
+                    <td>Pride</td>
+                    <td>9</td>
+                </tr>
+                </tbody>
+
+            </table>
+
+        </div>
+        <div class="col-2">
+            <button type="button" class="btn btn-info">Refresh</button>
+        </div>
+    </div>
+
+
+</div>
+
+
+<script type="text/javascript">
+
+function loadAllSinCharts(){
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawPieChart);
+    google.charts.setOnLoadCallback(drawStackedBarChart);
+    google.charts.setOnLoadCallback(drawLineChart);
+
+}
+loadAllSinCharts()
+
+</script>
+
+{% endblock %}

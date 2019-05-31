@@ -1,0 +1,5 @@
+*.txt
+__pycache__
+*.pyc
+tweet_key.json
+tweet.json

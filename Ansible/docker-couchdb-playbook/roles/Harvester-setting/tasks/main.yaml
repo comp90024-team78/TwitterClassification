@@ -1,0 +1,49 @@
+# set proxy for harvester
+- name: Set harvester proxy
+  become: true
+  copy:
+    src: "./files/network-proxy/environment"
+    dest: /etc/environment
+
+# install python3 pip and vim
+- name: Install Python
+  raw: sudo apt-get -y install  python3-pip vim python3
+
+# install dependency for harvester
+- name: Install Dependency
+  raw: pip3 install couchdb;
+     pip3 install pandas;
+     pip3 install --upgrade tensorflow;
+     pip3 install tensorflow-hub;
+     pip3 install seaborn;
+     pip3 install tweepy;
+     pip3 install geopy
+
+# remove old version harvester
+- name: Remove old version code
+  raw: rm -rf /home/ubuntu/Harvester
+# get the updated version
+- name: Clone Code
+  raw: git clone https://github.com/comp90024-team78/Harvester.git
+
+# get key for harvester to use tweepy
+- name: Get key
+  become: true
+  copy:
+    src: ./files/Harvester-Python-package/tweet_key.json
+    dest: /home/ubuntu/Harvester/tweet_key.json
+
+- name: Get rn bash
+  become: true
+  copy:
+    src: ./files/Harvester-Python-package/run.sh
+    dest: /home/ubuntu/Harvester/run.sh
+    mode: 0755
+
+- name: Run harvester
+  raw: sudo touch /home/ubuntu/Harvester/rt.txt;
+    sudo chmod 777 /home/ubuntu/Harvester/rt.txt;
+
+- name: Runing
+  raw: . /home/ubuntu/Harvester/run.sh
+

@@ -1,0 +1,10 @@
+# mount volume to a directory
+- name: Mount volumes to directory
+  become: true
+  copy:
+    src: ./files/mount-volumes/mount-volumes.sh
+    dest: /home/ubuntu
+
+- name: Mounting
+  raw: sudo chmod +x  mount-volumes.sh;
+     sudo bash ./mount-volumes.sh

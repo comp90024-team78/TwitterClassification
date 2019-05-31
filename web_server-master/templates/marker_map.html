@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+{% block body %}
+<div id="map"></div>
+<script>
+
+	//initialize map
+
+      function initMap() {
+	  
+	  //set the default center lattitude to focus on Australia
+	  
+        var myLatLng = {lat: -25.363, lng: 135.044};
+
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 4,
+          center: myLatLng
+        });
+
+        var sins_data= {{ sins_data | tojson | safe}};
+
+		//set images for sloth and greed
+
+        var sloth_image = {
+          url: "{{ url_for('static', filename='sloth_small.svg') }}",
+        };
+
+        var greed_image = {
+          url: "{{ url_for('static', filename='greed.svg') }}",
+        };
+        // Shapes define the clickable region of the icon. The type defines an HTML
+        // <area> element 'poly' which traces out a polygon as a series of X,Y points.
+        // The final coordinate closes the poly by connecting to the first coordinate.
+        var shape = {
+          coords: [1, 1, 1, 20, 18, 20, 18, 1],
+          type: 'poly'
+        };
+
+
+	
+      for (var i = 0; i < sins_data.length; i++) {
+          var sin = sins_data[i];
+
+          var coordinates=sin['coordinates'];
+
+          var latitude=parseFloat(coordinates.split(',')[1])
+          var longitude=parseFloat(coordinates.split(',')[0])
+
+		//display the marker, the icons being sloth or greed
+
+          var marker = new google.maps.Marker({
+            position: {lat: latitude, lng: longitude},
+            map: map,
+            icon: sin["label"]=='sloth'?  sloth_image:greed_image,
+            shape: shape,
+            title: sin["text"],
+            zIndex: 1
+          });
+
+          //marker.setAnimation(google.maps.Animation.BOUNCE);
+        }
+
+
+      }
+
+
+
+</script>
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCGdnrighe6R9fIiw9_rpzmn1SG-QOd3mU&callback=initMap">
+</script>
+
+{% endblock %}

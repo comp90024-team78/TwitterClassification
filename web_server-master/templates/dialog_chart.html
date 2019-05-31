@@ -1,0 +1,79 @@
+<div style="overflow:hidden" id="chart-modal">
+    <div style="margin: 0 !important;">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h5 class="modal-title text-center" id="modal-heading"></h5>
+            </div>
+
+            <!-- Modal body -->
+            <div class="modal-body">
+                <div id="barchart_values" style="width: 900px; height: 300px;"></div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+
+//draw the stacked bar chart
+
+function drawStackedBarChart(){
+
+//parse json received from flask
+
+var json_year= JSON.parse('{{ year_data | tojson | safe}}');
+
+var object_keys=Object.keys(json_year)
+
+var static_heading=['Year', "Greed", "Sloth", { role: 'annotation' } ]
+
+var final_data=[];
+final_data.push(static_heading);
+
+
+//create array the google map requries
+
+for(i=0;i<object_keys.length;i++){
+
+    var data=[object_keys[i],json_year[object_keys[i]].greed,json_year[object_keys[i]].sloth,'']
+
+    final_data.push(data);
+
+}
+
+//put data to google map
+
+var data = google.visualization.arrayToDataTable(final_data);
+
+      var view = new google.visualization.DataView(data);
+      view.setColumns([0, 1,
+                       { calc: "stringify",
+                         sourceColumn: 1,
+                         type: "string",
+                         role: "annotation" },
+                       2]);
+
+      var options = {
+        width: 750,
+        height: 300,
+        legend: { position: 'top', maxLines: 3 },
+        bar: { groupWidth: '90%' },
+        isStacked: true,
+        vAxis: { gridlines: { count: 4 } }
+
+      };
+	  
+	  //display the chart in the container
+
+    var chart = new google.visualization.BarChart(document.getElementById("barchart_values"));
+       chart.draw(data, options);
+}
+
+//call the function after the google map is loaded
+    google.charts.setOnLoadCallback(drawStackedBarChart);
+
+</script>

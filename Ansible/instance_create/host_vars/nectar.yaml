@@ -1,0 +1,74 @@
+# common vars
+availability_zone: melbourne-qh2-uom
+
+## volumes for servers
+#volumes:
+#  - vol_name: couchdb1_mem
+#    vol_size: 80
+#  - vol_name: couchdb2_mem
+#    vol_size: 80
+#  - vol_name: havester_mem
+#    vol_size: 50
+#  - vol_name: webserver_mem
+#    vol_size: 40
+
+# security groups
+
+security_groups:
+  - name: ssh
+    description: "for http access"
+    protocol: tcp
+    port_range_min: 22
+    port_range_max: 22
+    remote_ip_prefix: 0.0.0.0/0
+
+  - name: http
+    description: "for http access"
+    protocol: tcp
+    port_range_min: 80
+    port_range_max: 80
+    remote_ip_prefix: 0.0.0.0/0
+
+  - name: internal
+    description: "for couchdb access"
+    protocol: tcp
+    port_range_min: 1
+    port_range_max: 65535
+    remote_ip_prefix: 0.0.0.0/0
+
+
+
+# instances group
+instances_groups:
+  - name: Couchdb1
+    description: "This is a couchdb server"
+    instance_image: afccf48a-9426-4618-86dc-0ceb636f0169
+    instance_key_name: team
+    instance_flavor: uom.mse.2c9g
+    instance_network: qh2-uom-internal
+    instance_volume: 98dac984-945c-4ff7-8c9e-59cf0db04937
+
+  - name: Couchdb2
+    description: "This is a couchdb server"
+    instance_image: afccf48a-9426-4618-86dc-0ceb636f0169
+    instance_key_name: team
+    instance_flavor: uom.mse.2c9g
+    instance_network: qh2-uom-internal
+    instance_volume: e113be02-3400-44db-8f28-c846a1c84dce
+
+
+  - name: Havester
+    description: "This is a harvester server"
+    instance_image: afccf48a-9426-4618-86dc-0ceb636f0169
+    instance_key_name: team
+    instance_flavor: uom.mse.2c9g
+    instance_network: qh2-uom-internal
+    instance_volume: 01f4b2f1-6c0b-4f7e-86a9-63e1165bd6dd
+
+  - name: WebServer
+    description: "This is a web server"
+    instance_image: afccf48a-9426-4618-86dc-0ceb636f0169
+    instance_key_name: team
+    instance_flavor: uom.mse.2c9g
+    instance_network: qh2-uom-internal
+    instance_volume: bf1c52e3-6eee-4fa7-8785-807c4ef2cc55

@@ -1,0 +1,102 @@
+{% extends "layout.html" %}
+{% block body %}
+
+
+<div class="container-fluid">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+	
+	//load barchart
+	
+      google.charts.load('current', {'packages':['bar']});
+      google.charts.setOnLoadCallback(drawSydneyChart);
+      google.charts.setOnLoadCallback(drawMelbourneChart);
+      google.charts.setOnLoadCallback(drawCanberraChart);
+
+	//function to display canberra chart
+
+      function drawCanberraChart() {
+        var data = google.visualization.arrayToDataTable([
+          ['Year', 'Greed', 'Theft'],
+          ['2015', {{canberra['greed']['2015']}}, {{canberra['theft']['2015']}}],
+          ['2016', {{canberra['greed']['2016']}}, {{canberra['theft']['2016']}}]
+        ]);
+
+        var options = {
+          chart: {
+            title: 'Canberra',
+          },
+          bars: 'vertical' // Required for Material Bar Charts.
+        };
+
+        var chart = new google.charts.Bar(document.getElementById('barchart_brisbane'));
+
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+      }
+
+//function to display melbourne chart
+
+      function drawMelbourneChart() {
+        var data = google.visualization.arrayToDataTable([
+          ['Year', 'Greed', 'Theft'],
+          ['2015', {{melbourne['greed']['2015']}}, {{melbourne['theft']['2015']}}],
+          ['2016', {{melbourne['greed']['2016']}}, {{melbourne['theft']['2016']}}]
+        ]);
+
+        var options = {
+          chart: {
+            title: 'Melbourne',
+          },
+          bars: 'vertical' // Required for Material Bar Charts.
+        };
+
+        var chart = new google.charts.Bar(document.getElementById('barchart_melbourne'));
+
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+      }
+	  
+	  //function to display sydney chart
+
+      function drawSydneyChart() {
+        var data = google.visualization.arrayToDataTable([
+          ['Year', 'Greed', 'Theft'],
+          ['2015', {{sydney['greed']['2015']}}, {{sydney['theft']['2015']}}],
+          ['2016', {{sydney['greed']['2016']}}, {{sydney['theft']['2016']}}]
+        ]);
+
+        var options = {
+          chart: {
+            title: 'Sydney',
+          },
+          bars: 'vertical' // Required for Material Bar Charts.
+        };
+
+        var chart = new google.charts.Bar(document.getElementById('barchart_sydney'));
+
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+      }
+
+
+
+
+
+    </script>
+	
+	<!-- Boostrap columns -->
+
+    <div style="margin-top:150px;margin-left:20px" class="row">
+        <div class="col-xs-3" style="margin-right:30px">
+
+            <div id="barchart_sydney" style="width: 350px; height: 400px;"></div>
+        </div>
+
+        <div class="col-xs-3" style="margin-right:50px">
+            <div id="barchart_melbourne" style="width: 350px; height: 400px;"></div>
+        </div>
+        <div class="col-xs-3">
+            <div id="barchart_brisbane" style="width: 350px; height: 400px;"></div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

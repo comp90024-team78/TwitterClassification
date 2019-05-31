@@ -1,0 +1,24 @@
+# create a dir mount to container
+- name: Create directory to mount
+  raw: sudo mkdir -p /home/ubuntu/common
+
+## remove all exist container
+#- name: Stop Containers
+#  raw: docker container stop couchdb;
+#     docker container rm couchdb
+
+# genneral container setting
+- name: Container setting
+
+  raw: sudo docker run -d --network host --name couchdb --mount type=bind,src=/home/ubuntu/common/data,dst=/opt/couchdb/data couchdb:2.3.0;
+     sudo docker exec couchdb bash -c "echo \"-setcookie couchdb_cluster\" >> /opt/couchdb/etc/vm.args";
+     sudo docker exec couchdb bash -c "echo \"-name couchdb@"{{ansible_default_ipv4.address}}"\" >> /opt/couchdb/etc/vm.args";
+     sudo docker restart couchdb;
+     sudo sleep 10;
+
+     curl -X PUT http://127.0.0.1:5984/_node/_local/_config/admins/admin -d '"admin"';
+     curl -X PUT http://admin:admin@127.0.0.1:5984/_node/_local/_config/chttpd/bind_address -d '"0.0.0.0"';
+     curl -X PUT http://admin:admin@127.0.0.1:5984/_node/_local/_config/couchdb/uuid -d '"21ff4f72b0f574e9fd0c0c65e9000b01"';
+     curl -X PUT http://admin:admin@127.0.0.1:5984/_node/_local/_config/couch_httpd_auth/secret -d '"21ff4f72b0f574e9fd0c0c65e90016a8"'
+     curl -X POST -H "Content-Type:application/json" http://admin:admin@127.0.0.1:5984/_cluster_setup -d'{"action":"enable_cluster", "bind_address":"0.0.0.0", "username":"admin", "password":"admin", "node_count":"2"}'
+

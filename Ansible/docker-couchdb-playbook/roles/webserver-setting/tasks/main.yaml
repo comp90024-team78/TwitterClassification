@@ -1,0 +1,45 @@
+# set proxy for web
+- name: Set web proxy
+  become: true
+  copy:
+    src: "./files/network-proxy/environment"
+    dest: /etc/environment
+
+# do the apt update
+- name: Update apt
+  raw: sudo apt-get update
+
+# clone webserver from our github
+- name: Clone Web
+  raw: git clone https://github.com/comp90024-team78/web_server.git
+
+- name: Basic setting
+  raw: sudo chmod 0755 /home/ubuntu/web_server/web_server.sh;
+    . /home/ubuntu/web_server/web_server.sh
+
+- name: Move file to folder
+  raw: sudo mv  /home/ubuntu/web_server/web_server.sh \
+    /home/ubuntu/web_server/assignment_2.py \
+    /home/ubuntu/web_server/static \
+    /home/ubuntu/web_server/templates  /var/www/web_app
+
+- name: Copy python-couchdb RealAPI
+  become: true
+  copy:
+    src: ./files/couchdb-API/RealAPI.py
+    dest: /var/www/web_app
+
+- name: Copy python-couchdb TheftDBAPI
+  become: true
+  copy:
+    src: ./files/couchdb-API/TheftDBAPI.py
+    dest: /var/www/web_app
+
+- name: Copy python-couchdb TweetDBAPI
+  become: true
+  copy:
+    src: ./files/couchdb-API/TweetDBAPI.py
+    dest: /var/www/web_app
+
+- name: Restart WebServer
+  raw: sudo systemctl restart uwsgi
